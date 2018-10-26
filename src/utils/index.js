@@ -1,0 +1,13 @@
+export { default as compose } from './compose';
+export { default as curry } from './curry';
+export { default as flip } from './flip';
+export { default as head } from './head';
+export { default as id } from './id';
+export { default as isEmpty } from './isEmpty';
+export { default as o } from './o';
+export { default as partial } from './partial';
+export { default as partialRight } from './partialRight';
+export { default as pipe } from './pipe';
+export { default as reduce } from './reduce';
+export { default as tail } from './tail';
+export { default as unapply } from './unapply';

@@ -1,5 +1,5 @@
-import { pipe, compose } from 'jducers/src/utility';
-import * as SJ from 'jducers/src/jducers/sync'
+import { pipe, compose } from '../src/utils';
+import * as SJ from '../src/jducers/sync';
 
 let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
@@ -14,7 +14,7 @@ const doubleMap = SJ.map(double);
 const minusOneMap = SJ.map(minusOne);
 const isOddFilter = SJ.filter(isOdd);
 const plusThreeReduce = SJ.reduce(plusTre, []);
-const sumReduce = SJ.reduce(sum);
+const sumReduce = SJ.reduce(sum, 0);
 const multiplyReduce = SJ.reduce(mult, 1);
 
 
@@ -34,6 +34,6 @@ let jducer4 = compose(multiplyReduce, doubleMap, isOddFilter);
 res = SJ.run(jducer4, array);
 console.log(res);
 
-let jducer5 = compose(doubleMap, sumReduce, minusOneMap, isOddFilter);
+let jducer5 = compose(sumReduce, doubleMap, minusOneMap, isOddFilter);
 res = SJ.run(jducer5, array);
 console.log(res);

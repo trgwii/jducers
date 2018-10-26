@@ -1,66 +1,39 @@
-import { curryForReduce, curry } from './../utility';
+import curry from '../utils/curry';
+import _filter from './filter';
+import _map from './map';
 
-
-
-async function* _filter(pred, input) {
-    for await (const x of input) pred(x) ? yield x : null;
-}
-
-async function* _map(fun, input) {
-    for await (const x of input) yield fun(x);
-}
-
-async function* _reduce(reducer, initValue, input) {
-
-    const iterator = input[Symbol.asyncIterator]();
-
-    let flag = false;
-    if (initValue instanceof Array) flag = true;
-
-    let acc;
-    if (initValue != undefined) {
-        acc = initValue;
-    } else {
-        acc = (await iterator.next()).value;
-        if (flag) yield acc;
+export const chain = curry(async function* _chain(f, input) {
+    for await (const x of input) {
+        yield* await f(x);
     }
+});
 
-    for await (const x of iterator) {
+export const filter = _filter(chain);
+export const map = _map(chain);
+
+export const reduce = curry(async (reducer, acc, input) => {
+    for await (const x of input) {
         acc = reducer(acc, x);
-        if (flag) yield acc[acc.length ? acc.length - 1 : 0]
     }
-    if (!flag) yield acc;
-}
+    return acc;
+});
 
-function observerFactory(...cbs) {
-
-    const callbacks = [...cbs];
-
+export const observerFactory = (...cbs) =>
     async function* observer(input) {
         for await (const x of input) {
-            callbacks.forEach(cb => cb(x));
+            cbs.forEach(cb => cb(x));
             yield x;
         }
-    }
+    };
 
-    observer.add = (...cbs) => observer.callbacks.push(...cbs);
-    return observer;
-}
-
-
-
-async function run(jducer, input) {
+export const run = async (f, input) => {
     const res = [];
-    for await (const x of jducer(input)) {
+    const ret = f(input);
+    if (!ret[Symbol.asyncIterator]) {
+        return ret;
+    }
+    for await (const x of f(input)) {
         res.push(x);
     }
-    return res.length == 1 ? res[0] : res;
-}
-
-
-
-const map = curry(_map);
-const filter = curry(_filter);
-const reduce = curryForReduce(_reduce);
-
-export { map, filter, reduce, run, observerFactory }
+    return res.length === 1 ? res[0] : res;
+};
